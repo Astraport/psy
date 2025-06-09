@@ -528,91 +528,6 @@
             }
         }
 		
-		/* Новые стили для кнопок сфер жизни */
-		
-		.sphere-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .sphere-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 70px;
-            padding: 10px 5px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            font-size: 0.8rem;
-        }
-
-        .sphere-btn:hover {
-            background: #f0f0f0;
-            transform: translateY(-2px);
-        }
-
-        .sphere-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-            transform: scale(1.05);
-        }
-
-        .sphere-icon {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-        }
-
-        /* Стили для кнопок типа события */
-        .event-type-buttons {
-            display: flex;
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .event-type-btn {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 15px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .event-type-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-        }
-
-        .event-type-btn.active {
-            transform: scale(1.03);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        }
-
-        .positive-type-btn {
-            background: linear-gradient(135deg, #4CAF50, #81C784);
-            color: white;
-        }
-
-        .negative-type-btn {
-            background: linear-gradient(135deg, #f44336, #ef5350);
-            color: white;
-        }
-		
     </style>
 </head>
 <body>
@@ -631,7 +546,7 @@
         </div>
     </div>
 
-  <!-- Модальное окно -->
+    <!-- Модальное окно -->
     <div class="modal" id="eventModal">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal()">&times;</button>
@@ -644,61 +559,33 @@
                     <input type="range" class="slider" id="eventYear" min="1970" max="2024" value="2020" step="1">
                 </div>
 
-                <!-- Заменяем выпадающий список на кнопки типа события -->
-                <div class="form-group" id="eventTypeGroup">
-                    <label class="form-label">Тип события *</label>
-                    <div class="event-type-buttons">
-                        <button type="button" class="event-type-btn positive-type-btn" id="positiveTypeBtn">
-                            <span>😊</span> Позитивное
-                        </button>
-                        <button type="button" class="event-type-btn negative-type-btn" id="negativeTypeBtn">
-                            <span>😢</span> Негативное
-                        </button>
-                    </div>
-                </div>
-
                 <div class="form-group">
                     <label class="form-label">Название события *</label>
                     <input type="text" class="form-input" id="eventTitle" maxlength="100" required>
                 </div>
 
-                <!-- Заменяем выпадающий список на иконки сфер жизни -->
+                <div class="form-group" id="eventTypeGroup">
+                    <label class="form-label">Тип события *</label>
+                    <select class="form-select" id="eventType" required>
+                        <option value="">Выберите тип</option>
+                        <option value="positive">Позитивное событие</option>
+                        <option value="negative">Негативное событие</option>
+                    </select>
+                </div>
+
                 <div class="form-group">
                     <label class="form-label">Сфера жизни *</label>
-                    <div class="sphere-buttons" id="sphereButtons">
-                        <button type="button" class="sphere-btn" data-sphere="family">
-                            <span class="sphere-icon">👨‍👩‍👧‍👦</span>
-                            Семья
-                        </button>
-                        <button type="button" class="sphere-btn" data-sphere="health">
-                            <span class="sphere-icon">💪</span>
-                            Здоровье
-                        </button>
-                        <button type="button" class="sphere-btn" data-sphere="education">
-                            <span class="sphere-icon">🎓</span>
-                            Образование
-                        </button>
-                        <button type="button" class="sphere-btn" data-sphere="relationships">
-                            <span class="sphere-icon">💕</span>
-                            Отношения
-                        </button>
-                        <button type="button" class="sphere-btn" data-sphere="children">
-                            <span class="sphere-icon">👶</span>
-                            Дети
-                        </button>
-                        <button type="button" class="sphere-btn" data-sphere="work">
-                            <span class="sphere-icon">💼</span>
-                            Работа
-                        </button>
-                        <button type="button" class="sphere-btn" data-sphere="business">
-                            <span class="sphere-icon">🚀</span>
-                            Бизнес
-                        </button>
-                        <button type="button" class="sphere-btn" data-sphere="other">
-                            <span class="sphere-icon">⭐</span>
-                            Другое
-                        </button>
-                    </div>
+                    <select class="form-select" id="eventSphere" required>
+                        <option value="">Выберите сферу</option>
+                        <option value="family">Семья</option>
+                        <option value="health">Здоровье</option>
+                        <option value="education">Образование</option>
+                        <option value="relationships">Отношения</option>
+                        <option value="children">Дети</option>
+                        <option value="work">Работа</option>
+                        <option value="business">Бизнес</option>
+                        <option value="other">Другое</option>
+                    </select>
                 </div>
 
                 <div class="form-group">
@@ -1300,232 +1187,6 @@
             generateTimeline();
             renderAllEvents();
         }
-		
-		// Добавляем переменные для хранения выбранных значений
-        let selectedEventType = null;
-        let selectedSphere = null;
-
-        // Инициализация кнопок сфер жизни
-        function initSphereButtons() {
-            const sphereButtons = document.querySelectorAll('.sphere-btn');
-            sphereButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Убираем активный класс у всех кнопок
-                    sphereButtons.forEach(b => b.classList.remove('active'));
-                    
-                    // Добавляем активный класс к выбранной кнопке
-                    this.classList.add('active');
-                    
-                    // Сохраняем выбранную сферу
-                    selectedSphere = this.dataset.sphere;
-                });
-            });
-        }
-
-        // Инициализация кнопок типа события
-        function initEventTypeButtons() {
-            const positiveBtn = document.getElementById('positiveTypeBtn');
-            const negativeBtn = document.getElementById('negativeTypeBtn');
-            
-            positiveBtn.addEventListener('click', function() {
-                positiveBtn.classList.add('active');
-                negativeBtn.classList.remove('active');
-                selectedEventType = 'positive';
-            });
-            
-            negativeBtn.addEventListener('click', function() {
-                negativeBtn.classList.add('active');
-                positiveBtn.classList.remove('active');
-                selectedEventType = 'negative';
-            });
-        }
-
-        // Обновление формы при открытии модального окна
-        function openAddEventModal() {
-            currentYear = null;
-            currentEventType = null;
-            editingEventId = null;
-            
-            const modal = document.getElementById('eventModal');
-            const title = document.getElementById('modalTitle');
-            const yearGroup = document.getElementById('yearGroup');
-            const eventTypeGroup = document.getElementById('eventTypeGroup');
-            
-            title.textContent = 'Добавить новое событие';
-            title.style.color = '#333';
-            yearGroup.style.display = 'block';
-            eventTypeGroup.style.display = 'block';
-            
-            // Сбрасываем выбор
-            document.querySelectorAll('.sphere-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.getElementById('positiveTypeBtn').classList.remove('active');
-            document.getElementById('negativeTypeBtn').classList.remove('active');
-            
-            selectedEventType = null;
-            selectedSphere = null;
-            
-            // Очистить форму
-            document.getElementById('eventForm').reset();
-            document.getElementById('imagePreview').style.display = 'none';
-            updateSliderValues();
-            
-            modal.style.display = 'block';
-        }
-
-        function openModal(year, type) {
-            currentYear = year;
-            currentEventType = type;
-            editingEventId = null;
-            
-            const modal = document.getElementById('eventModal');
-            const title = document.getElementById('modalTitle');
-            const yearGroup = document.getElementById('yearGroup');
-            const eventTypeGroup = document.getElementById('eventTypeGroup');
-            
-            title.textContent = type === 'positive' ? 'Добавить позитивное событие' : 'Добавить негативное событие';
-            title.style.color = type === 'positive' ? '#4CAF50' : '#f44336';
-            yearGroup.style.display = 'none';
-            eventTypeGroup.style.display = 'none';
-            
-            // Сбрасываем выбор сферы
-            document.querySelectorAll('.sphere-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            selectedSphere = null;
-            
-            // Очистить форму
-            document.getElementById('eventForm').reset();
-            document.getElementById('imagePreview').style.display = 'none';
-            updateSliderValues();
-            
-            modal.style.display = 'block';
-        }
-
-        // Обработка формы
-        document.getElementById('eventForm').onsubmit = function(e) {
-            e.preventDefault();
-            
-            const title = document.getElementById('eventTitle').value;
-            const image = document.getElementById('imagePreview').src;
-            const impact = document.getElementById('impactSlider').value;
-            const intensity = document.getElementById('intensitySlider').value;
-            const future = document.getElementById('futureSlider').value;
-            
-            // Определяем год и тип события
-            let year, type;
-            if (currentYear === null) {
-                year = parseInt(document.getElementById('eventYear').value);
-                
-                // Используем выбранный тип из кнопок
-                type = selectedEventType;
-                if (!type) {
-                    alert('Укажите тип события');
-                    return;
-                }
-            } else {
-                year = currentYear;
-                type = currentEventType;
-            }
-            
-            // Проверяем выбранную сферу
-            if (!selectedSphere) {
-                alert('Выберите сферу жизни');
-                return;
-            }
-            
-            if (!eventsData[year]) {
-                eventsData[year] = [];
-            }
-            
-            // Проверка лимита событий
-            const yearEvents = eventsData[year].filter(e => e.type === type);
-            if (yearEvents.length >= 5 && !editingEventId) {
-                alert('Максимум 5 событий каждого типа на год');
-                return;
-            }
-            
-            const eventData = {
-                id: editingEventId || Date.now(),
-                title,
-                sphere: selectedSphere,
-                image,
-                impact: parseInt(impact),
-                intensity: parseInt(intensity),
-                future: parseInt(future),
-                type
-            };
-            
-            if (editingEventId) {
-                const index = eventsData[year].findIndex(e => e.id === editingEventId);
-                eventsData[year][index] = eventData;
-            } else {
-                eventsData[year].push(eventData);
-            }
-            
-            console.log('Сохранение события:', eventData);
-            saveDataToStorage();
-            generateTimeline();
-            renderAllEvents();
-            closeModal();
-        }
-
-        // При редактировании события
-        function editEvent(event) {
-            const year = Object.keys(eventsData).find(y => 
-                eventsData[y].some(e => e.id === event.id)
-            );
-            
-            currentYear = parseInt(year);
-            currentEventType = event.type;
-            editingEventId = event.id;
-            
-            // Заполнить форму
-            document.getElementById('eventTitle').value = event.title;
-            
-            // Устанавливаем выбранную сферу
-            selectedSphere = event.sphere;
-            document.querySelectorAll('.sphere-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.sphere === event.sphere) {
-                    btn.classList.add('active');
-                }
-            });
-            
-            document.getElementById('eventYear').value = parseInt(year);
-            document.getElementById('impactSlider').value = event.impact;
-            document.getElementById('intensitySlider').value = event.intensity;
-            document.getElementById('futureSlider').value = event.future;
-            
-            if (event.image) {
-                document.getElementById('imagePreview').src = event.image;
-                document.getElementById('imagePreview').style.display = 'block';
-            }
-            
-            updateSliderValues();
-            
-            const modal = document.getElementById('eventModal');
-            const title = document.getElementById('modalTitle');
-            const yearGroup = document.getElementById('yearGroup');
-            const eventTypeGroup = document.getElementById('eventTypeGroup');
-            
-            title.textContent = 'Редактировать событие';
-            yearGroup.style.display = 'none';
-            eventTypeGroup.style.display = 'none';
-            
-            modal.style.display = 'block';
-        }
-
-        // Инициализация при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            loadDataFromStorage();
-            generateTimeline();
-            renderAllEvents();
-            initSphereButtons(); // Инициализируем кнопки сфер
-            initEventTypeButtons(); // Инициализируем кнопки типа события
-            console.log('Приложение инициализировано');
-        });
     </script>
 </body>
 </html>

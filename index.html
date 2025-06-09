@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Таймлайн жизни</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .floating-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #ff6b6b, #ffa726);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .floating-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.3) 100%);
+            border-radius: 2px;
+        }
+
+        .year-item {
+            position: relative;
+            margin-bottom: 120px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .year-circle {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff6b6b, #ffa726);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            cursor: pointer;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .year-circle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+        }
+
+        .year-buttons {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s ease;
+        }
+
+        .year-buttons.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .event-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            white-space: nowrap;
+        }
+
+        .positive-btn {
+            background: linear-gradient(135deg, #4CAF50, #81C784);
+            color: white;
+        }
+
+        .negative-btn {
+            background: linear-gradient(135deg, #f44336, #ef5350);
+            color: white;
+        }
+
+        .event-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .event-btn-icon {
+            font-size: 1.2rem;
+        }
+
+        .events-container {
+            position: absolute;
+            top: 100px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        .events-left, .events-right {
+            width: 45%;
+            position: relative;
+            height: 150px;
+            pointer-events: all;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .events-left {
+            justify-content: flex-end;
+        }
+
+        .events-right {
+            justify-content: flex-start;
+        }
+
+        .event-card {
+            position: relative;
+            background: rgba(255,255,255,0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            width: 280px;
+            z-index: 1;
+            flex-shrink: 0;
+        }
+
+        .events-left .event-card {
+            margin-left: -140px;
+        }
+
+        .events-left .event-card:first-child {
+            margin-left: 0;
+        }
+
+        .events-right .event-card {
+            margin-left: -140px;
+        }
+
+        .events-right .event-card:first-child {
+            margin-left: 0;
+        }
+
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+        }
+
+        .event-card.active {
+            z-index: 5 !important;
+            transform: scale(1.05);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+        }
+
+        .event-card.positive {
+            border-left: 5px solid #4CAF50;
+        }
+
+        .event-card.negative {
+            border-left: 5px solid #f44336;
+        }
+
+        .event-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .event-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.2rem;
+        }
+
+        .event-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .event-sphere {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .event-metrics {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .slider-container {
+            margin-bottom: 20px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .slider-value {
+            text-align: center;
+            margin-top: 5px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .image-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .debug-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            font-family: monospace;
+            font-size: 12px;
+        }
+
+        .debug-panel.open {
+            transform: translateY(0);
+        }
+
+        .debug-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 1002;
+            transition: all 0.3s ease;
+        }
+
+        .debug-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        .debug-content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .debug-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+
+        .debug-title {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .debug-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 30px;
+            }
+
+            .year-item {
+                padding-left: 80px;
+            }
+
+            .year-circle {
+                position: absolute;
+                left: 0;
+            }
+
+            .year-buttons {
+                position: static;
+                transform: none;
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 20px;
+            }
+
+            .event-btn {
+                justify-content: center;
+                padding: 10px 15px;
+            }
+
+            .events-container {
+                flex-direction: column;
+                position: static;
+                margin-top: 20px;
+            }
+
+            .events-left, .events-right {
+                width: 100%;
+                height: auto;
+                margin-bottom: 20px;
+            }
+
+            .event-card {
+                position: static !important;
+                width: 100%;
+                margin: 0 0 15px 0 !important;
+            }
+        }
+		
+    </style>
+</head>
+<body>
+    <button class="floating-btn" onclick="openAddEventModal()" title="Добавить событие">
+        +
+    </button>
+
+    <div class="container">
+        <div class="header">
+            <h1>Таймлайн жизни</h1>
+            <p>Создайте историю своих важных событий</p>
+        </div>
+
+        <div class="timeline" id="timeline">
+            <!-- Годы будут генерироваться динамически -->
+        </div>
+    </div>
+
+    <!-- Модальное окно -->
+    <div class="modal" id="eventModal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Добавить событие</h2>
+            </div>
+            <form id="eventForm">
+                <div class="form-group" id="yearGroup" style="display: none;">
+                    <label class="form-label">Год: <span id="yearValue">2020</span></label>
+                    <input type="range" class="slider" id="eventYear" min="1970" max="2024" value="2020" step="1">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Название события *</label>
+                    <input type="text" class="form-input" id="eventTitle" maxlength="100" required>
+                </div>
+
+                <div class="form-group" id="eventTypeGroup">
+                    <label class="form-label">Тип события *</label>
+                    <select class="form-select" id="eventType" required>
+                        <option value="">Выберите тип</option>
+                        <option value="positive">Позитивное событие</option>
+                        <option value="negative">Негативное событие</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Сфера жизни *</label>
+                    <select class="form-select" id="eventSphere" required>
+                        <option value="">Выберите сферу</option>
+                        <option value="family">Семья</option>
+                        <option value="health">Здоровье</option>
+                        <option value="education">Образование</option>
+                        <option value="relationships">Отношения</option>
+                        <option value="children">Дети</option>
+                        <option value="work">Работа</option>
+                        <option value="business">Бизнес</option>
+                        <option value="other">Другое</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Изображение</label>
+                    <input type="file" class="form-input" id="eventImage" accept="image/*">
+                    <img id="imagePreview" class="image-preview" style="display: none;">
+                </div>
+
+                <div class="slider-container">
+                    <label class="form-label">Степень влияния: <span id="impactValue">5</span></label>
+                    <input type="range" class="slider" id="impactSlider" min="1" max="10" value="5">
+                </div>
+
+                <div class="slider-container">
+                    <label class="form-label">Яркость ощущений: <span id="intensityValue">5</span></label>
+                    <input type="range" class="slider" id="intensitySlider" min="1" max="10" value="5">
+                </div>
+
+                <div class="slider-container">
+                    <label class="form-label">Влияние на будущее: <span id="futureValue">5</span></label>
+                    <input type="range" class="slider" id="futureSlider" min="1" max="10" value="5">
+                </div>
+
+                <button type="submit" class="btn-primary">Сохранить</button>
+            </form>
+        </div>
+    </div>
+
+    <button class="debug-toggle" onclick="toggleDebugPanel()">JSON Debug</button>
+
+    <div class="debug-panel" id="debugPanel">
+        <div class="debug-header">
+            <div class="debug-title">JSON данные для БД</div>
+            <button class="debug-close" onclick="toggleDebugPanel()">&times;</button>
+        </div>
+        <div class="debug-content" id="debugContent"></div>
+    </div>
+
+    <script>
+        let currentYear = null;
+        let currentEventType = null;
+        let editingEventId = null;
+        let eventsData = {};
+        let activeCard = null;
+        let lastClickTime = 0;
+        let lastClickedCard = null;
+
+        // Иконки для сфер
+        const sphereIcons = {
+            family: '👨‍👩‍👧‍👦',
+            health: '💪',
+            education: '🎓',
+            relationships: '💕',
+            children: '👶',
+            work: '💼',
+            business: '🚀',
+            other: '⭐'
+        };
+
+        // Загрузка данных из localStorage (более надежный способ)
+        function loadDataFromStorage() {
+            try {
+                const data = localStorage.getItem('timelineEvents');
+                if (data) {
+                    eventsData = JSON.parse(data);
+                    console.log('Данные загружены из localStorage:', eventsData);
+                    updateDebugPanel();
+                    return;
+                }
+            } catch (e) {
+                console.error('Ошибка загрузки из localStorage:', e);
+            }
+            
+            // Fallback к cookies если localStorage недоступен
+            const cookieData = getCookie('timelineEvents');
+            if (cookieData) {
+                try {
+                    eventsData = JSON.parse(decodeURIComponent(cookieData));
+                    console.log('Данные загружены из cookies:', eventsData);
+                    updateDebugPanel();
+                } catch (e) {
+                    console.error('Ошибка загрузки из cookies:', e);
+                    eventsData = {};
+                }
+            } else {
+                eventsData = {};
+            }
+        }
+
+        // Сохранение в localStorage и cookies
+        function saveDataToStorage() {
+            try {
+                localStorage.setItem('timelineEvents', JSON.stringify(eventsData));
+                console.log('Данные сохранены в localStorage');
+            } catch (e) {
+                console.error('Ошибка сохранения в localStorage:', e);
+            }
+            
+            // Дублируем в cookies как резервный способ
+            try {
+                setCookie('timelineEvents', encodeURIComponent(JSON.stringify(eventsData)), 365);
+                console.log('Данные сохранены в cookies');
+            } catch (e) {
+                console.error('Ошибка сохранения в cookies:', e);
+            }
+            
+            updateDebugPanel();
+        }
+
+        function setCookie(name, value, days) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = name + '=' + value + ';expires=' + expires.toUTCString() + ';path=/;SameSite=Strict';
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        // Генерация JSON для БД
+        function generateDatabaseJSON() {
+            const dbData = {
+                user_id: "user_" + Date.now(), // В реальном приложении это будет ID пользователя
+                timeline_data: {
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                    events: []
+                },
+                statistics: {
+                    total_events: 0,
+                    positive_events: 0,
+                    negative_events: 0,
+                    years_covered: [],
+                    spheres_distribution: {},
+                    avg_impact: 0,
+                    avg_intensity: 0,
+                    avg_future_influence: 0
+                }
+            };
+
+            let totalImpact = 0;
+            let totalIntensity = 0;
+            let totalFuture = 0;
+            let eventCount = 0;
+
+            // Обработка всех событий
+            Object.keys(eventsData).forEach(year => {
+                if (eventsData[year] && eventsData[year].length > 0) {
+                    dbData.statistics.years_covered.push(parseInt(year));
+                    
+                    eventsData[year].forEach(event => {
+                        // Добавление события в массив
+                        dbData.timeline_data.events.push({
+                            id: event.id,
+                            year: parseInt(year),
+                            title: event.title,
+                            type: event.type,
+                            sphere: event.sphere,
+                            impact: event.impact,
+                            intensity: event.intensity,
+                            future_influence: event.future,
+                            has_image: !!event.image,
+                            image_data: event.image || null,
+                            created_at: new Date().toISOString()
+                        });
+
+                        // Подсчет статистики
+                        eventCount++;
+                        totalImpact += event.impact;
+                        totalIntensity += event.intensity;
+                        totalFuture += event.future;
+
+                        if (event.type === 'positive') {
+                            dbData.statistics.positive_events++;
+                        } else {
+                            dbData.statistics.negative_events++;
+                        }
+
+                        // Распределение по сферам
+                        if (!dbData.statistics.spheres_distribution[event.sphere]) {
+                            dbData.statistics.spheres_distribution[event.sphere] = 0;
+                        }
+                        dbData.statistics.spheres_distribution[event.sphere]++;
+                    });
+                }
+            });
+
+            // Финальная статистика
+            dbData.statistics.total_events = eventCount;
+            dbData.statistics.avg_impact = eventCount > 0 ? (totalImpact / eventCount).toFixed(2) : 0;
+            dbData.statistics.avg_intensity = eventCount > 0 ? (totalIntensity / eventCount).toFixed(2) : 0;
+            dbData.statistics.avg_future_influence = eventCount > 0 ? (totalFuture / eventCount).toFixed(2) : 0;
+            dbData.statistics.years_covered.sort((a, b) => b - a);
+
+            return dbData;
+        }
+
+        // Обновление отладочной панели
+        function updateDebugPanel() {
+            const debugContent = document.getElementById('debugContent');
+            if (debugContent) {
+                const dbData = generateDatabaseJSON();
+                debugContent.textContent = JSON.stringify(dbData, null, 2);
+            }
+        }
+
+        // Переключение отладочной панели
+        function toggleDebugPanel() {
+            const panel = document.getElementById('debugPanel');
+            panel.classList.toggle('open');
+            if (panel.classList.contains('open')) {
+                updateDebugPanel();
+            }
+        }
+
+        // Получение списка годов для отображения
+        function getYearsToDisplay() {
+            const currentYear = new Date().getFullYear();
+            const defaultYears = [currentYear, 2020, 2010];
+            const eventYears = Object.keys(eventsData).map(y => parseInt(y));
+            const allYears = [...new Set([...defaultYears, ...eventYears])];
+            return allYears.sort((a, b) => b - a);
+        }
+
+        // Генерация таймлайна
+        function generateTimeline() {
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = '';
+            
+            const years = getYearsToDisplay();
+            
+            years.forEach(year => {
+                const yearItem = document.createElement('div');
+                yearItem.className = 'year-item';
+                yearItem.innerHTML = `
+                    <div class="year-circle" onclick="toggleYearButtons(${year})">
+                        ${year}
+                    </div>
+                    <div class="year-buttons" id="buttons-${year}">
+                        <button class="event-btn negative-btn" onclick="openModal(${year}, 'negative')" title="Негативное событие">
+                            <span class="event-btn-icon">😢</span>
+                            <span>Негативное событие</span>
+                        </button>
+                        <button class="event-btn positive-btn" onclick="openModal(${year}, 'positive')" title="Позитивное событие">
+                            <span class="event-btn-icon">😊</span>
+                            <span>Позитивное событие</span>
+                        </button>
+                    </div>
+                    <div class="events-container" id="events-${year}">
+                        <div class="events-left" id="negative-${year}"></div>
+                        <div class="events-right" id="positive-${year}"></div>
+                    </div>
+                `;
+                timeline.appendChild(yearItem);
+            });
+        }
+
+        function toggleYearButtons(year) {
+            const buttons = document.getElementById(`buttons-${year}`);
+            const isActive = buttons.classList.contains('active');
+            
+            // Закрыть все активные кнопки
+            document.querySelectorAll('.year-buttons.active').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            if (!isActive) {
+                buttons.classList.add('active');
+            }
+        }
+
+        function openAddEventModal() {
+            currentYear = null;
+            currentEventType = null;
+            editingEventId = null;
+            
+            const modal = document.getElementById('eventModal');
+            const title = document.getElementById('modalTitle');
+            const yearGroup = document.getElementById('yearGroup');
+            const eventTypeGroup = document.getElementById('eventTypeGroup');
+            
+            title.textContent = 'Добавить новое событие';
+            title.style.color = '#333';
+            yearGroup.style.display = 'block';
+            eventTypeGroup.style.display = 'block';
+            
+            // Очистить форму
+            document.getElementById('eventForm').reset();
+            document.getElementById('imagePreview').style.display = 'none';
+            updateSliderValues();
+            
+            modal.style.display = 'block';
+        }
+
+        function openModal(year, type) {
+            currentYear = year;
+            currentEventType = type;
+            editingEventId = null;
+            
+            const modal = document.getElementById('eventModal');
+            const title = document.getElementById('modalTitle');
+            const yearGroup = document.getElementById('yearGroup');
+            const eventTypeGroup = document.getElementById('eventTypeGroup');
+            
+            title.textContent = type === 'positive' ? 'Добавить позитивное событие' : 'Добавить негативное событие';
+            title.style.color = type === 'positive' ? '#4CAF50' : '#f44336';
+            yearGroup.style.display = 'none';
+            eventTypeGroup.style.display = 'none';
+            
+            // Очистить форму
+            document.getElementById('eventForm').reset();
+            document.getElementById('eventType').value = type;
+            document.getElementById('imagePreview').style.display = 'none';
+            updateSliderValues();
+            
+            modal.style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('eventModal').style.display = 'none';
+        }
+
+        function updateSliderValues() {
+            document.getElementById('impactValue').textContent = document.getElementById('impactSlider').value;
+            document.getElementById('intensityValue').textContent = document.getElementById('intensitySlider').value;
+            document.getElementById('futureValue').textContent = document.getElementById('futureSlider').value;
+            document.getElementById('yearValue').textContent = document.getElementById('eventYear').value;
+        }
+
+        // Обработчики слайдеров
+        document.getElementById('impactSlider').oninput = function() {
+            document.getElementById('impactValue').textContent = this.value;
+        }
+
+        document.getElementById('intensitySlider').oninput = function() {
+            document.getElementById('intensityValue').textContent = this.value;
+        }
+
+        document.getElementById('futureSlider').oninput = function() {
+            document.getElementById('futureValue').textContent = this.value;
+        }
+
+        document.getElementById('eventYear').oninput = function() {
+            document.getElementById('yearValue').textContent = this.value;
+        }
+
+        // Предпросмотр изображения
+        document.getElementById('eventImage').onchange = function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Обработка формы
+        document.getElementById('eventForm').onsubmit = function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('eventTitle').value;
+            const sphere = document.getElementById('eventSphere').value;
+            const image = document.getElementById('imagePreview').src;
+            const impact = document.getElementById('impactSlider').value;
+            const intensity = document.getElementById('intensitySlider').value;
+            const future = document.getElementById('futureSlider').value;
+            
+            // Определяем год и тип события
+            let year, type;
+            if (currentYear === null) {
+                year = parseInt(document.getElementById('eventYear').value);
+                type = document.getElementById('eventType').value;
+                if (!type) {
+                    alert('Укажите тип события');
+                    return;
+                }
+            } else {
+                year = currentYear;
+                type = currentEventType;
+            }
+            
+            if (!eventsData[year]) {
+                eventsData[year] = [];
+            }
+            
+            // Проверка лимита событий
+            const yearEvents = eventsData[year].filter(e => e.type === type);
+            if (yearEvents.length >= 5 && !editingEventId) {
+                alert('Максимум 5 событий каждого типа на год');
+                return;
+            }
+            
+            const eventData = {
+                id: editingEventId || Date.now(),
+                title,
+                sphere,
+                image,
+                impact: parseInt(impact),
+                intensity: parseInt(intensity),
+                future: parseInt(future),
+                type
+            };
+            
+            if (editingEventId) {
+                const index = eventsData[year].findIndex(e => e.id === editingEventId);
+                eventsData[year][index] = eventData;
+            } else {
+                eventsData[year].push(eventData);
+            }
+            
+            console.log('Сохранение события:', eventData);
+            saveDataToStorage();
+            generateTimeline();
+            renderAllEvents();
+            closeModal();
+        }
+
+        function renderEvents(year) {
+            const positiveContainer = document.getElementById(`positive-${year}`);
+            const negativeContainer = document.getElementById(`negative-${year}`);
+            
+            if (!positiveContainer || !negativeContainer) return;
+            
+            positiveContainer.innerHTML = '';
+            negativeContainer.innerHTML = '';
+            
+            if (eventsData[year]) {
+                const positiveEvents = eventsData[year].filter(e => e.type === 'positive');
+                const negativeEvents = eventsData[year].filter(e => e.type === 'negative');
+                
+                positiveEvents.forEach((event, index) => {
+                    const eventCard = createEventCard(event, index);
+                    positiveContainer.appendChild(eventCard);
+                });
+                
+                negativeEvents.forEach((event, index) => {
+                    const eventCard = createEventCard(event, index);
+                    negativeContainer.appendChild(eventCard);
+                });
+            }
+        }
+
+        function createEventCard(event, index) {
+            const card = document.createElement('div');
+            card.className = `event-card ${event.type}`;
+            card.style.zIndex = 5 - index;
+            
+            card.onclick = (e) => handleCardClick(card, event, e);
+            
+            const sphereText = {
+                family: 'Семья',
+                health: 'Здоровье',
+                education: 'Образование',
+                relationships: 'Отношения',
+                children: 'Дети',
+                work: 'Работа',
+                business: 'Бизнес',
+                other: 'Другое'
+            };
+            
+            card.innerHTML = `
+                <div class="event-header">
+                    <div class="event-icon" style="background: ${event.type === 'positive' ? '#4CAF50' : '#f44336'}">
+                        ${sphereIcons[event.sphere] || '⭐'}
+                    </div>
+                    <div class="event-title">${event.title}</div>
+                </div>
+                <div class="event-sphere">${sphereText[event.sphere]}</div>
+                <div class="event-metrics">
+                    <span>Влияние: ${event.impact}/10</span>
+                    <span>Яркость: ${event.intensity}/10</span>
+                    <span>Будущее: ${event.future}/10</span>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function handleCardClick(card, event, e) {
+            e.stopPropagation();
+            
+            const currentTime = Date.now();
+            const isDoubleClick = (currentTime - lastClickTime < 500) && (lastClickedCard === card);
+            
+            if (isDoubleClick) {
+                // Двойной клик - открыть редактирование
+                editEvent(event);
+                lastClickTime = 0; // Сбросить время для предотвращения тройного клика
+                lastClickedCard = null;
+            } else {
+                // Одинарный клик - сделать активной
+                if (activeCard && activeCard !== card) {
+                    activeCard.classList.remove('active');
+                }
+                
+                if (card.classList.contains('active')) {
+                    // Если карточка уже активна, ничего не делаем при первом клике
+                } else {
+                    card.classList.add('active');
+                    card.style.zIndex = 10;
+                    activeCard = card;
+                }
+                
+                lastClickTime = currentTime;
+                lastClickedCard = card;
+            }
+        }
+
+        function editEvent(event) {
+            const year = Object.keys(eventsData).find(y => 
+                eventsData[y].some(e => e.id === event.id)
+            );
+            
+            currentYear = parseInt(year);
+            currentEventType = event.type;
+            editingEventId = event.id;
+            
+            // Заполнить форму
+            document.getElementById('eventTitle').value = event.title;
+            document.getElementById('eventSphere').value = event.sphere;
+            document.getElementById('eventType').value = event.type;
+            document.getElementById('eventYear').value = parseInt(year);
+            document.getElementById('impactSlider').value = event.impact;
+            document.getElementById('intensitySlider').value = event.intensity;
+            document.getElementById('futureSlider').value = event.future;
+            
+            if (event.image) {
+                document.getElementById('imagePreview').src = event.image;
+                document.getElementById('imagePreview').style.display = 'block';
+            }
+            
+            updateSliderValues();
+            
+            const modal = document.getElementById('eventModal');
+            const title = document.getElementById('modalTitle');
+            const yearGroup = document.getElementById('yearGroup');
+            const eventTypeGroup = document.getElementById('eventTypeGroup');
+            
+            title.textContent = 'Редактировать событие';
+            yearGroup.style.display = 'none';
+            eventTypeGroup.style.display = 'none';
+            
+            modal.style.display = 'block';
+        }
+
+        function renderAllEvents() {
+            Object.keys(eventsData).forEach(year => {
+                renderEvents(year);
+            });
+        }
+
+        // Закрытие модального окна по клику вне его
+        window.onclick = function(event) {
+            const modal = document.getElementById('eventModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Сброс активной карточки при клике вне карточек
+        document.onclick = function(e) {
+            if (!e.target.closest('.event-card') && activeCard) {
+                activeCard.classList.remove('active');
+                activeCard = null;
+            }
+        }
+
+        // Установка максимального года для слайдера
+        document.getElementById('eventYear').max = new Date().getFullYear();
+
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDataFromStorage();
+            generateTimeline();
+            renderAllEvents();
+            console.log('Приложение инициализировано');
+        });
+
+        // Запуск если DOM уже загружен
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                loadDataFromStorage();
+                generateTimeline();
+                renderAllEvents();
+            });
+        } else {
+            loadDataFromStorage();
+            generateTimeline();
+            renderAllEvents();
+        }
+    </script>
+</body>
+</html>
